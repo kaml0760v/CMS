@@ -1,0 +1,138 @@
+<?php
+/* Plugin Name: myplugin
+   Author: Komal Prajapati
+   Description: This plugin is for managing participants. 
+   slug: add-members-slug*/
+   
+add_action('admin_menu', 'ManageParticipant');
+
+function ManageParticipant(){
+add_menu_page('Participant', 'Participant', 'manage_options', 'members-slug', 'insertparticipant');
+add_submenu_page( 'members-slug', 'ParticipantDetail', 'ParticipantDetail', 'manage_options', 'add-members-slug', 'displaydetailparticipant');
+add_submenu_page( 'members-slug', 'Report', 'Report', 'manage_options', 'add-sub-members-slug', 'reportcontest');
+add_submenu_page( 'members-slug','Displaycount ','Displaycount','manage_options','add-sub-widget-slug','widgetcontest');
+
+}
+
+function insertparticipant()
+{
+	include("insertparticipant.php");
+}
+function displaydetailparticipant()
+{
+	include("displaydetail.php");
+}
+function reportcontest()
+{
+	include("reportcontest.php");
+}
+
+function widgetcontest()
+{
+	include("displaycount.php");
+}
+
+function pluginactivate()
+{      
+  global $wpdb;
+  $sql="create table wp_participantdata (id int(11) AUTO_INCREMENT PRIMARY KEY,pname varchar(50),profilephoto varchar(1000),mobileno varchar(10),email varchar(50),dob date,contestselect varchar(50),cdtae date);";
+  $wpdb->query($sql);
+}
+//register activation hook & deactivation hook
+register_activation_hook(__FILE__,'pluginactivate');
+register_deactivation_hook(__FILE__,'pluginactivate');
+?>
+
+
+insert.php
+<html>
+ <head>
+        <style>
+            input {
+            width: 100%;
+            height:100%;
+            }
+        </style>
+    </head>
+	<body style="text-align:center;">
+		<form method="post" enctype="multipart/form-data" >
+				<center>
+				<h2> Register</h2>
+				<table>
+					<tr>
+					  <td>Name: </td>
+					  <td><input type="text" id="pname" name="pname" placeholder="Enter Name" ></td>
+					</tr>
+					<tr>
+						<td>Profile Pic:</td>
+						<td><input type="file" id="img" name="img[]" multiple id="uc3"></td>
+					</tr>
+					<tr>
+					  <td>Contact Number : </td>
+					  <td><input type="text" id="phone" name="phone" placeholder="Enter Mobile No." ></td>
+					</tr>
+					<tr>
+					  <td>Email id: </td>
+					  <td><input type="email" id="mail" name="mail" placeholder="Enter Email id" ></td>
+					</tr>
+					<tr>
+					  <td>D.O.B: </td>
+					  <td><input type="date" id="dob" name="dob"  ></td>
+					</tr>
+					<tr>
+						<td>Select Contest:</td>
+						<td>
+						<select name="contest">
+							<option value="-1">----------Select Contest---------</option>
+							<option value="Khana Khajana">Khana Khajana</option>
+							<option value="India'a Best Rasoi">India'a Best Rasoi</option>
+							<option value="Masterchef India">Masterchef India</option>
+							<option value="Rasoi Prastuti">Rasoi Prastuti</option>
+						</select>
+						</td>
+					</tr>
+					<tr>
+					  <td>Year: </td>
+					  <td><input type="date" id="dob" name="cdob"  ></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input type="submit" value="Submit" name="submit"></td>
+					</tr>
+				</table>
+				</center>
+
+			
+		</form>
+	</body>
+</html>
+<?php
+	if(isset($_POST["submit"]))
+	{
+		for($i=0;$i<count($_FILES["img"]["name"]);$i++)
+	{
+		$filetmp=$_FILES["img"]["tmp_name"][$i];
+		$filename=$_FILES["img"]["name"][$i];
+		$filetype=$_FILES["img"]["type"][$i];
+		$filepath="images/".$filename;
+		move_uploaded_file($filetmp,$filepath);
+		
+		$Name=$_POST["pname"];
+	   
+		$Mobile=$_POST["phone"];
+		$Email=$_POST["mail"];
+		$DOB=$_POST["dob"];
+		$SELECT=$_POST["contest"];
+		$YEAR=$_POST["cdob"];
+		global $wpdb;
+		$sql=$wpdb->insert("wp_participantdata",array("id"=>null,"pname"=>$Name,"profilephoto"=>$filepath,"mobileno"=>$Mobile,"email"=>$Email,"dob"=>$DOB,"contestselect"=>$SELECT,"cdate"=>$YEAR));
+		if($sql==true)
+		{
+			echo "<script>alert('inserted sucessfully Data');</script>";
+		}
+	}
+		
+		
+	}
+?>
+
